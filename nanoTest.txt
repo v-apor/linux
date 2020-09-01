@@ -1,0 +1,3 @@
+Test Text.
+Note the commands below while using nano, The ^ represents ctrl key
+^W to save 
