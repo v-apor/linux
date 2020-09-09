@@ -1,20 +1,29 @@
 #/bin/bash
-
+# Creates a new user on local system
+# You must supply a username as an argument of the script
 #storing username
 CURRUSER=$(id -u)
 
 if [[ ${CURRUSER} -ne 0 ]]
 then
-    echo "Please run the script as root user, syntax: "    
-    echo "sudo $(basename ${0}) [USERNAME] [COMMENT]"
+    echo "Please run the script as root user. "    
     exit 1
 fi
+
+if [[ ${#} -lt 1 ]]
+then 
+    echo "Usage: $(basename ${0}) USERNAME [COMMENT]..."
+    echo 'Create an account on the local system with the name of USER_NAME and a comment field COMMENT'
+    exit 1
+fi
+
 USERNAME=${1}
-shift
-FULLNAME=${@}
-echo ${@}
-PASSWORD="${RANDOM}$(date +%sN)${RANDOM}"
-useradd -c "${FULLNAME}" ${USERNAME}
+shift               # This shifts positional parameters by 1
+COMMENT=${@}
+PASSWORD="$(echo '${RANDOM}$(date +%sN)${RANDOM}' | sha256sum | head -c16)"
+useradd -c "${COMMENT}" -m ${USERNAME}
+
+# Check if the account was created
 
 if [[ ${?} -ne 0 ]]
 then
@@ -30,8 +39,11 @@ then
     exit 1
 fi
 
+# To force password change on first login 
 passwd --expire ${USERNAME}
 
+# Display the details
+echo
 echo "Username: ${USERNAME}"
 echo "Password: ${PASSWORD}"
 echo "Hostname: ${HOSTNAME}"
